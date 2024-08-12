@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'models.dart';
-import 'dart:convert';
 
 class ProductProvider with ChangeNotifier {
   List<Product> _products = [];
@@ -19,7 +17,6 @@ class ProductProvider with ChangeNotifier {
   Future<void> addProduct(Product product) async {
     _products.add(product);
     notifyListeners();
-    await saveProducts();
   }
 
   Future<void> saveProducts() async {

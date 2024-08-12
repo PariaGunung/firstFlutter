@@ -11,10 +11,6 @@ class CashierPage extends StatefulWidget {
 class _CashierPageState extends State<CashierPage> {
   final Map<Product, int> _cart = {};
 
-  double get _totalPrice {
-    return _cart.entries.fold(0.0, (total, entry) => total + entry.key.price * entry.value);
-  }
-
   void _addToCart(Product product) {
     setState(() {
       if (_cart.containsKey(product)) {
