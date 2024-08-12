@@ -17,11 +17,16 @@ class _AdminPageState extends State<AdminPage> {
     final double price = double.tryParse(_priceController.text) ?? 0.0;
 
     if (name.isNotEmpty && price > 0) {
-      Provider.of<ProductProvider>(context, listen: false).addProduct(Product(name: name, price: price));
+      Provider.of<ProductProvider>(context, listen: false)
+          .addProduct(Product(name: name, price: price));
 
       _nameController.clear();
       _priceController.clear();
     }
+  }
+
+  void _deleteProduct(int index) {
+    Provider.of<ProductProvider>(context, listen: false).removeProduct(index);
   }
 
   @override
@@ -57,7 +62,16 @@ class _AdminPageState extends State<AdminPage> {
                       final product = provider.products[index];
                       return ListTile(
                         title: Text(product.name),
-                        trailing: Text('Rp. ${product.price}'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text('Rp. ${product.price}'),
+                            IconButton(
+                              icon: Icon(Icons.delete),
+                              onPressed: () => _deleteProduct(index),
+                            ),
+                          ],
+                        ),
                       );
                     },
                   );

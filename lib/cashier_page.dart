@@ -21,12 +21,37 @@ class _CashierPageState extends State<CashierPage> {
     });
   }
 
-  void _checkout() {
-    setState(() {
-      _cart.clear();
+  double _calculateTotal() {
+    double total = 0.0;
+    _cart.forEach((product, qty) {
+      total += product.price * qty;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Transaksi berhasil')),
+    return total;
+  }
+
+  void _completePayment() {
+    final totalAmount = _calculateTotal();
+    // Logika untuk menyimpan atau mencetak rekap pembayaran
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Rekap Pembayaran'),
+          content: Text('Total Pembayaran: Rp. $totalAmount'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Logika untuk menyimpan atau mencetak
+                Navigator.of(context).pop();
+                setState(() {
+                  _cart.clear(); // Kosongkan keranjang setelah pembayaran
+                });
+              },
+              child: Text('Selesai'),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -34,40 +59,45 @@ class _CashierPageState extends State<CashierPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cashier Page'),
+        title: Text('Kasir Page'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Consumer<ProductProvider>(
-                builder: (context, provider, child) {
-                  return ListView.builder(
-                    itemCount: provider.products.length,
-                    itemBuilder: (context, index) {
-                      final product = provider.products[index];
-                      return ListTile(
-                        title: Text(product.name),
-                        trailing: Text('Rp. ${product.price}'),
-                        onTap: () => _addToCart(product),
-                      );
-                    },
-                  );
-                },
-              ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: Consumer<ProductProvider>(
+              builder: (context, provider, child) {
+                return ListView.builder(
+                  itemCount: provider.products.length,
+                  itemBuilder: (context, index) {
+                    final product = provider.products[index];
+                    return ListTile(
+                      title: Text(product.name),
+                      trailing: Text('Rp. ${product.price}'),
+                      onTap: () => _addToCart(product),
+                    );
+                  },
+                );
+              },
             ),
-            Text(
-              'Total: Rp. $_totalPrice',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          Divider(),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Total: Rp. ${_calculateTotal()}',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                ElevatedButton(
+                  onPressed: _completePayment,
+                  child: Text('Bayar'),
+                ),
+              ],
             ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _checkout,
-              child: Text('Bayar'),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
