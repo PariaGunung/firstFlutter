@@ -3,7 +3,7 @@ import '../models/item_model.dart';
 import '../helpers/database_helper.dart';
 
 class ItemService {
-  final dbHelper = Databasehelper.instance;
+  final dbHelper = DatabaseHelper.instance;
 
   Future<List<Item>> getItems() async {
     final allRows = await dbHelper.queryAllRows();
