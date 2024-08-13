@@ -1,30 +1,64 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-
+import 'package:provider/provider.dart';  // Ensure this import is present
+import 'package:myapp/pages/admin_page.dart';
+import 'package:myapp/pages/settings_page.dart';
+import 'package:myapp/services/purchase_history_service.dart';
+import 'package:myapp/models/purchase_history_model.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    
+  group('AdminPage Widget Tests', () {
+    testWidgets('AdminPage should render the title and buttons',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: AdminPage()));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      expect(find.text('Admin Page'), findsOneWidget);
+      expect(find.byType(TextField), findsNWidgets(2));
+      expect(find.text('Add Item'), findsOneWidget);
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    testWidgets('AdminPage should render the settings icon',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: AdminPage()));
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      expect(find.byIcon(Icons.settings), findsOneWidget);
+    });
+  });
+
+  group('SettingsPage Widget Tests', () {
+    final purchaseHistoryService = PurchaseHistoryService();
+
+    testWidgets('SettingsPage should render the transaction history and logout button',
+        (WidgetTester tester) async {
+      // Simulate adding a purchase to the history
+      final purchase = PurchaseHistory(
+        id: '1',
+        items: [],
+        quantities: [],
+        totalPrice: 100.0,
+        dateTime: DateTime.now(),
+      );
+      await purchaseHistoryService.addPurchase(purchase);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ChangeNotifierProvider(
+            create: (_) => purchaseHistoryService,
+            child: SettingsPage(),
+          ),
+        ),
+      );
+
+      expect(find.text('Transaction History'), findsOneWidget);
+      expect(find.text('Logout'), findsOneWidget);
+      expect(find.text('Total: \$100.00'), findsOneWidget);
+    });
+
+    testWidgets('SettingsPage should show a message when there is no history',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(home: SettingsPage()));
+
+      expect(find.text('No transactions recorded yet.'), findsOneWidget);
+    });
   });
 }
